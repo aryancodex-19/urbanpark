@@ -2172,4 +2172,178 @@ body {
                 padding: 0.75rem;
             }
         }
-    
+
+/* ==========================================================================
+   SMOOTH UI MICRO-INTERACTIONS & ANIMATIONS
+   ========================================================================== */
+
+/* 1. Global View Fade & Slide Transition */
+@keyframes viewEnter {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.view {
+  animation: viewEnter 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+}
+
+/* 2. Interactive KPI & Metric Card Animations */
+.kpi-card {
+  transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.24s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.24s ease !important;
+}
+
+.kpi-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 18px -4px rgba(15, 23, 42, 0.08), 0 4px 6px -2px rgba(15, 23, 42, 0.04);
+}
+
+.kpi-card:hover .kpi-icon {
+  transform: scale(1.08) rotate(2deg);
+  transition: transform 0.25s ease;
+}
+
+.kpi-icon {
+  transition: transform 0.25s ease;
+}
+
+/* 3. Slot Bay Items Micro-animation */
+.slot-item {
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.2s ease,
+              background-color 0.2s ease !important;
+  cursor: pointer;
+}
+
+.slot-item:hover {
+  transform: translateY(-4px) scale(1.04);
+  box-shadow: 0 8px 16px -2px rgba(0, 0, 0, 0.12);
+  z-index: 5;
+}
+
+.slot-item:active {
+  transform: scale(0.97);
+}
+
+/* 4. Smooth Button Interactions & Hover Feedback */
+.btn, .btn-hero-primary, .btn-hero-secondary, .user-nav-btn, .filter-pill, .nav-btn {
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  position: relative;
+}
+
+.btn:active, .btn-hero-primary:active, .btn-hero-secondary:active {
+  transform: scale(0.97) !important;
+}
+
+.btn-hero-primary {
+  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.btn-hero-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.45);
+}
+
+/* 5. Modals Smooth Pop-in & Backdrop Blur */
+@keyframes overlayFadeIn {
+  from {
+    opacity: 0;
+    backdrop-filter: blur(0px);
+  }
+  to {
+    opacity: 1;
+    backdrop-filter: blur(5px);
+  }
+}
+
+@keyframes modalScaleIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.93) translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.modal-overlay {
+  animation: overlayFadeIn 0.2s ease-out forwards;
+  backdrop-filter: blur(5px);
+}
+
+.modal, .operator-pin-card {
+  animation: modalScaleIn 0.26s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+}
+
+/* 6. Dropdown & Notification Panel Animation */
+@keyframes panelSlideDown {
+  0% {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.notification-panel.open {
+  animation: panelSlideDown 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transform-origin: top right;
+}
+
+/* 7. Table Row & List Items Hover Fluidity */
+.data-table tbody tr {
+  transition: background-color 0.18s ease, transform 0.18s ease;
+}
+
+.data-table tbody tr:hover {
+  background-color: rgba(37, 99, 235, 0.03);
+}
+
+.activity-item {
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.activity-item:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+  transform: translateX(3px);
+}
+
+.activity-item:hover .activity-icon {
+  transform: scale(1.08);
+  transition: transform 0.2s ease;
+}
+
+/* 8. Panels & Cards Elevation */
+.panel {
+  transition: box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.panel:hover {
+  box-shadow: var(--shadow-md);
+}
+
+/* 9. Nav Links & Sidebar items */
+.sidebar .nav-btn {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.sidebar .nav-btn:hover:not(.active) {
+  transform: translateX(4px);
+}
+
+.sidebar .nav-btn.active {
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.2);
+}
