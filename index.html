@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UrbanServe - Kanakia Road Public Parking</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Leaflet Map CSS & JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* Specific User Side Styles overriding or adding to style.css */
+        .user-header {
+            background-color: var(--card-bg);
+            padding: 0.75rem 2rem;
+            display: grid;
+            grid-template-columns: 200px 1fr 200px;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            transition: box-shadow 0.3s ease;
+        }
+        
+        .user-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--primary-color);
+            cursor: pointer;
+            transition: opacity 0.2s ease;
+        }
+        .user-logo:hover {
+            opacity: 0.85;
+        }
+        .user-logo h2 {
+            font-size: 1.35rem;
+            font-weight: 700;
+            margin: 0;
+            color: var(--text-main);
+            letter-spacing: -0.02em;
+        }
+        
+        .user-nav-container {
+            display: flex;
+            justify-content: center;
+        }
+        .user-nav {
+            display: flex;
+            gap: 0.25rem;
+            background-color: var(--bg-color);
+            padding: 0.35rem;
+            border-radius: 50px;
+            border: 1px solid var(--border-color);
+        }
+        .user-nav-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            padding: 0.5rem 1.25rem;
+            border-radius: 40px;
+            transition: all 0.2s ease;
+        }
+        .user-nav-btn:hover:not(.active) {
+            color: var(--text-main);
+            background-color: rgba(0, 0, 0, 0.04);
+        }
+        .user-nav-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header-actions {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+        }
+        
+        #user-notification-bell {
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            transition: all 0.2s ease;
+        }
+        #user-notification-bell:hover {
+            background-color: var(--border-color);
+        }
+
+        .user-main {
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .hero-section {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        .hero-section h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .hero-section p {
+            color: var(--text-muted);
+            font-size: 1.2rem;
+        }
+        .primary-action {
+            margin-top: 2rem;
+            font-size: 1.2rem;
+            padding: 1rem 2rem;
+        }
+        .info-panel {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Hero Landing Page Styles */
+        .hero-landing-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 3rem;
+            padding-bottom: 2.5rem;
+        }
+
+        .hero-banner {
+            position: relative;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 55%, #1e3a8a 100%);
+            color: #ffffff;
+            border-radius: 20px;
+            padding: 3.5rem 2.5rem;
+            text-align: center;
+            overflow: hidden;
+            box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.25), 0 8px 10px -6px rgba(15, 23, 42, 0.2);
+        }
+
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -20%;
+            width: 140%;
+            height: 200%;
+            background: radial-gradient(circle at 50% 30%, rgba(37, 99, 235, 0.25) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        .hero-pill-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(8px);
+            padding: 6px 16px;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #93c5fd;
+            margin-bottom: 1.5rem;
+            letter-spacing: 0.02em;
+        }
+
+        .hero-pill-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #10b981;
+            box-shadow: 0 0 8px #10b981;
+            animation: heroPulse 2s infinite;
+        }
+
+        @keyframes heroPulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.85); }
+        }
+
+        .hero-title {
+            font-size: clamp(2rem, 5vw, 3.2rem);
+            font-weight: 800;
+            line-height: 1.15;
+            letter-spacing: -0.03em;
+            margin-bottom: 1.25rem;
+            color: #ffffff;
+        }
+
+        .hero-gradient-text {
+            background: linear-gradient(135deg, #60a5fa 0%, #38bdf8 50%, #a5b4fc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-description {
+            font-size: clamp(1rem, 2vw, 1.15rem);
+            color: #cbd5e1;
+            max-width: 680px;
+            margin: 0 auto 2.25rem;
+            line-height: 1.6;
+        }
+
+        .hero-cta-group {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .btn-hero-primary {
+            background: #2563eb;
+            color: #ffffff;
+            border: none;
+            padding: 0.85rem 1.85rem;
+            border-radius: 10px;
+            font-size: 1.05rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
+            transition: all 0.25s ease;
+        }
+
+        .btn-hero-primary:hover {
+            background: #1d4ed8;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.5);
+        }
+
+        .btn-hero-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            padding: 0.85rem 1.75rem;
+            border-radius: 10px;
+            font-size: 1.05rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            backdrop-filter: blur(8px);
+            transition: all 0.25s ease;
+        }
+
+        .btn-hero-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.4);
+            transform: translateY(-2px);
+        }
+
+        /* Quick Metrics Bar */
+        .hero-metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.25rem;
+        }
+
+        .hero-metric-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 1.25rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            box-shadow: var(--shadow-sm);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .hero-metric-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .hero-metric-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .hero-metric-val {
+            font-size: 1.45rem;
+            font-weight: 700;
+            color: var(--text-main);
+            line-height: 1.2;
+        }
+
+        .hero-metric-lbl {
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        /* Section Headline */
+        .section-headline {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .section-headline h2 {
+            font-size: 1.85rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: var(--text-main);
+            margin-bottom: 0.5rem;
+        }
+
+        .section-headline p {
+            color: var(--text-muted);
+            font-size: 1rem;
+        }
+
+        /* Steps Grid */
+        .hero-steps-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+        }
+
+        .hero-step-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 2rem 1.5rem;
+            position: relative;
+            box-shadow: var(--shadow-sm);
+            transition: transform 0.25s ease, border-color 0.25s ease;
+        }
+
+        .hero-step-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--accent-color);
+        }
+
+        .hero-step-number {
+            position: absolute;
+            top: 1rem;
+            right: 1.25rem;
+            font-size: 2.2rem;
+            font-weight: 900;
+            color: rgba(37, 99, 235, 0.12);
+            line-height: 1;
+        }
+
+        .hero-step-icon {
+            width: 46px;
+            height: 46px;
+            border-radius: 12px;
+            background: rgba(37, 99, 235, 0.1);
+            color: var(--accent-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.25rem;
+        }
+
+        .hero-step-card h3 {
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-main);
+        }
+
+        .hero-step-card p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        /* Features Grid */
+        .hero-features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+        }
+
+        .hero-feature-item {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            transition: all 0.2s ease;
+        }
+
+        .hero-feature-item:hover {
+            border-color: #cbd5e1;
+            box-shadow: var(--shadow-md);
+        }
+
+        .hero-feature-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Bottom Callout */
+        .hero-bottom-cta {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+        }
+
+        .hero-bottom-cta h3 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 0.25rem;
+        }
+
+        .hero-bottom-cta p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .btn-operator-link:hover {
+            background: var(--primary-hover) !important;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+        }
+
+        @media (max-width: 992px) {
+            .hero-metrics-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .hero-features-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .user-header {
+                grid-template-columns: 1fr auto;
+                padding: 1rem;
+                gap: 1rem;
+            }
+            .user-nav-container {
+                order: 3;
+                grid-column: 1 / -1;
+                width: 100%;
+            }
+            .user-nav {
+                width: 100%;
+                justify-content: space-between;
+                border-radius: 12px;
+                flex-wrap: wrap;
+            }
+            .user-nav-btn {
+                flex: 1;
+                text-align: center;
+                white-space: nowrap;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .hero-banner {
+                padding: 2.5rem 1.25rem;
+            }
+            .hero-steps-grid {
+                grid-template-columns: 1fr;
+            }
+            .hero-metrics-grid {
+                grid-template-columns: 1fr;
+            }
+            .hero-features-grid {
+                grid-template-columns: 1fr;
+            }
+            .hero-bottom-cta {
+                flex-direction: column;
+                text-align: center;
+            }
+            .hero-bottom-cta .btn-hero-primary {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+        
+        @media (max-width: 600px) {
+            .user-nav {
+                flex-direction: column;
+                background-color: transparent;
+                border: none;
+                padding: 0;
+                gap: 0.5rem;
+            }
+            .user-nav-btn {
+                background-color: var(--bg-color);
+                border: 1px solid var(--border-color);
+                border-radius: 8px;
+                padding: 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body class="light-theme">
+    <header class="user-header">
+        <div class="user-logo" id="logo-home-link" title="UrbanServe - Return to Welcome">
+            <i data-lucide="square-parking" width="28" height="28"></i>
+            <h2>UrbanServe</h2>
+        </div>
+        
+        <div class="user-nav-container">
+            <nav class="user-nav">
+                <button class="user-nav-btn active" data-target="hero-view">Home</button>
+                <button class="user-nav-btn" data-target="home-view">Live Facility</button>
+                <button class="user-nav-btn" data-target="slots-view">Parking Slots</button>
+                <button class="user-nav-btn" data-target="bookings-view">My Bookings</button>
+                <button class="user-nav-btn" data-target="info-view">Parking Information</button>
+            </nav>
+        </div>
+        
+        <div class="header-actions" style="display: flex; align-items: center; gap: 0.75rem;">
+            <div class="user-switcher-container">
+                <i data-lucide="user" style="width: 15px; height: 15px; color: var(--accent-color);"></i>
+                <select id="current-user-select" class="user-select" title="Switch Demo User">
+                    <option value="user1">user1</option>
+                    <option value="user2">user2</option>
+                    <option value="user3">user3</option>
+                </select>
+            </div>
+            <div class="notification-bell-container" id="user-notification-container">
+                <button class="notification-bell" id="user-notification-bell">
+                    <i data-lucide="bell" width="20" height="20"></i>
+                    <span class="notification-badge hidden" id="user-notification-badge">0</span>
+                </button>
+                <div class="notification-panel" id="user-notification-panel">
+                    <div class="notification-panel-header">
+                        <h3>Notifications</h3>
+                    </div>
+                    <div class="notification-list" id="user-notification-list">
+                        <!-- Populated by JS -->
+                    </div>
+                    <div class="notification-panel-footer">
+                        <button class="btn-link" id="user-mark-all-read">Mark all as read</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="user-main">
+        <!-- Hero Landing / Welcome View -->
+        <section id="hero-view" class="view active">
+            <div class="hero-landing-wrapper">
+                <!-- Top Hero Banner -->
+                <div class="hero-banner">
+                    <div class="hero-pill-badge">
+                        <span class="hero-pill-dot"></span>
+                        <span>Official Municipal Smart Parking • Mira Road East</span>
+                    </div>
+                    <h1 class="hero-title">
+                        Effortless Urban Parking.<br>
+                        <span class="hero-gradient-text">Real-Time. Guaranteed.</span>
+                    </h1>
+                    <p class="hero-description">
+                        Skip circling the block. Check live vacancy across 7+ verified municipal parking hubs, reserve your spot in advance, and park with zero friction.
+                    </p>
+                    <div class="hero-cta-group">
+                        <button class="btn-hero-primary btn-get-started" id="hero-get-started">
+                            <i data-lucide="sparkles"></i> Get Started <i data-lucide="arrow-right"></i>
+                        </button>
+                        <button class="btn-hero-secondary btn-explore-map" id="hero-explore-map">
+                            <i data-lucide="map-pin"></i> Live Availability Map
+                        </button>
+                        <a href="operator.html" class="btn-hero-secondary" style="text-decoration: none;">
+                            <i data-lucide="shield-check"></i> Operator Portal
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Quick Live Metrics -->
+                <div class="hero-metrics-grid">
+                    <div class="hero-metric-card">
+                        <div class="hero-metric-icon" style="background: rgba(37, 99, 235, 0.1); color: #2563eb;">
+                            <i data-lucide="map-pin"></i>
+                        </div>
+                        <div>
+                            <div class="hero-metric-val">8 Hubs</div>
+                            <div class="hero-metric-lbl">Active Facilities</div>
+                        </div>
+                    </div>
+                    <div class="hero-metric-card">
+                        <div class="hero-metric-icon" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">
+                            <i data-lucide="check-circle-2"></i>
+                        </div>
+                        <div>
+                            <div class="hero-metric-val" id="hero-stat-available">--</div>
+                            <div class="hero-metric-lbl">Available In Area</div>
+                        </div>
+                    </div>
+                    <div class="hero-metric-card">
+                        <div class="hero-metric-icon" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b;">
+                            <i data-lucide="banknote"></i>
+                        </div>
+                        <div>
+                            <div class="hero-metric-val">₹20 / hr</div>
+                            <div class="hero-metric-lbl">Standard Civic Rate</div>
+                        </div>
+                    </div>
+                    <div class="hero-metric-card">
+                        <div class="hero-metric-icon" style="background: rgba(139, 92, 246, 0.1); color: #8b5cf6;">
+                            <i data-lucide="shield-check"></i>
+                        </div>
+                        <div>
+                            <div class="hero-metric-val">100%</div>
+                            <div class="hero-metric-lbl">Civic Monitored</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- How It Works -->
+                <div>
+                    <div class="section-headline">
+                        <h2>How UrbanServe Works</h2>
+                        <p>3 simple steps to eliminate parking hassles forever</p>
+                    </div>
+                    <div class="hero-steps-grid">
+                        <div class="hero-step-card">
+                            <span class="hero-step-number">01</span>
+                            <div class="hero-step-icon"><i data-lucide="map"></i></div>
+                            <h3>1. Select Your Location</h3>
+                            <p>Browse 7+ parking facilities across Kanakia Road, Station Hub, Cinemax Arcade, and GCC Club with live occupancy status.</p>
+                        </div>
+                        <div class="hero-step-card">
+                            <span class="hero-step-number">02</span>
+                            <div class="hero-step-icon"><i data-lucide="grid-3x3"></i></div>
+                            <h3>2. Pick a Vacant Slot</h3>
+                            <p>Live visual green/red slot grid. View zone allocations, slot numbers, and reserve your spot with real-time reassurance.</p>
+                        </div>
+                        <div class="hero-step-card">
+                            <span class="hero-step-number">03</span>
+                            <div class="hero-step-icon"><i data-lucide="car"></i></div>
+                            <h3>3. Park & Enjoy Peace of Mind</h3>
+                            <p>Get instant digital booking receipt, drive directly to your reserved slot without wasting fuel or time in traffic.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Features / Why UrbanServe -->
+                <div>
+                    <div class="section-headline">
+                        <h2>Engineered for Smart Cities</h2>
+                        <p>Modern civic technology built for daily commuters and municipal efficiency</p>
+                    </div>
+                    <div class="hero-features-grid">
+                        <div class="hero-feature-item">
+                            <div class="hero-feature-icon" style="background: #ede9fe; color: #7c3aed;">
+                                <i data-lucide="shield-check"></i>
+                            </div>
+                            <h3 style="font-size: 1.05rem; font-weight: 600;">Municipal Supervised</h3>
+                            <p style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.5;">Supervised by dedicated municipal operators with real-time audit logs and transparent civic management.</p>
+                        </div>
+                        <div class="hero-feature-item">
+                            <div class="hero-feature-icon" style="background: #fef3c7; color: #d97706;">
+                                <i data-lucide="navigation"></i>
+                            </div>
+                            <h3 style="font-size: 1.05rem; font-weight: 600;">Interactive GPS Mapping</h3>
+                            <p style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.5;">Interactive OpenStreetMap with color-coded pins, occupancy badges, and one-tap area navigation.</p>
+                        </div>
+                        <div class="hero-feature-item">
+                            <div class="hero-feature-icon" style="background: #dcfce7; color: #16a34a;">
+                                <i data-lucide="calendar-check"></i>
+                            </div>
+                            <h3 style="font-size: 1.05rem; font-weight: 600;">Advance Slot Booking</h3>
+                            <p style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.5;">Book slots for your commute or weekend shopping ahead of time to guarantee your spot upon arrival.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bottom Call to Action Banner -->
+                <div class="hero-bottom-cta">
+                    <div>
+                        <h3>Ready to Park Without the Stress?</h3>
+                        <p>Check current real-time slot availability at your nearest Mira Road parking hub.</p>
+                    </div>
+                    <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                        <button class="btn-hero-primary btn-explore-map" id="hero-bottom-find-slots">
+                            <i data-lucide="arrow-right-circle"></i> Find Parking Slots
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Home View -->
+        <section id="home-view" class="view hidden">
+            <div class="hero-section">
+                <h1 id="user-facility-name">Kanakia Road Public Parking</h1>
+                <p id="user-facility-address">Mira Road East</p>
+                <div class="facility-selector-wrapper" style="margin-top: 1rem;">
+                    <label for="user-facility-select" style="font-size: 0.9rem; font-weight: 600; color: var(--text-muted); display: inline-flex; align-items: center; gap: 0.35rem;">
+                        <i data-lucide="map-pin" style="width: 16px; height: 16px;"></i> Select Area:
+                    </label>
+                    <select id="user-facility-select" class="facility-select">
+                        <!-- Populated dynamically by JS -->
+                    </select>
+                </div>
+                <p style="margin-top: 1rem; font-size: 0.9rem;">Last Updated: <span id="user-last-updated">--</span></p>
+            </div>
+            
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <div class="kpi-icon icon-blue"><i data-lucide="car"></i></div>
+                    <div class="kpi-data">
+                        <h3 class="kpi-label">TOTAL SLOTS</h3>
+                        <p class="kpi-value" id="user-total">0</p>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon icon-green"><i data-lucide="check-circle-2"></i></div>
+                    <div class="kpi-data">
+                        <h3 class="kpi-label">AVAILABLE</h3>
+                        <p class="kpi-value text-available" id="user-available">0</p>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon icon-red"><i data-lucide="x-circle"></i></div>
+                    <div class="kpi-data">
+                        <h3 class="kpi-label">OCCUPIED</h3>
+                        <p class="kpi-value text-occupied" id="user-occupied">0</p>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon icon-amber"><i data-lucide="wrench"></i></div>
+                    <div class="kpi-data">
+                        <h3 class="kpi-label">MAINTENANCE</h3>
+                        <p class="kpi-value text-maintenance" id="user-maintenance">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hero-section" style="margin-top: 2rem;">
+                <div style="font-size: 1.5rem; margin-bottom: 1rem;">Current Occupancy: <span id="user-occupancy-percent">0%</span></div>
+                <button class="btn primary-btn primary-action" id="btn-view-slots">
+                    View Available Slots
+                </button>
+            </div>
+
+            <div class="panel mt-lg" style="margin-top: 2rem;">
+                <div class="panel-header flex-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+                    <h3 style="display: flex; align-items: center; gap: 0.5rem; margin: 0;">
+                        <i data-lucide="map-pin"></i> Parking Location
+                    </h3>
+                    <div style="display: flex; align-items: center; gap: 1rem; font-size: 0.85rem;">
+                        <span style="display: inline-flex; align-items: center; gap: 0.35rem; color: #065f46; font-weight: 500;">
+                            <span style="width: 10px; height: 10px; border-radius: 50%; background: #10b981; display: inline-block;"></span> Available
+                        </span>
+                        <span style="display: inline-flex; align-items: center; gap: 0.35rem; color: #991b1b; font-weight: 500;">
+                            <span style="width: 10px; height: 10px; border-radius: 50%; background: #ef4444; display: inline-block;"></span> Occupied
+                        </span>
+                    </div>
+                </div>
+                <div id="map"></div>
+            </div>
+        </section>
+
+        <!-- Parking Slots View -->
+        <section id="slots-view" class="view hidden">
+            <header class="page-header">
+                <div class="header-content">
+                    <h1>Parking Slots</h1>
+                    <p>Current real-time availability for <strong id="user-slot-facility-name">Kanakia Road Public Parking</strong>.</p>
+                </div>
+            </header>
+            
+            <!-- Quick Filter Bar -->
+            <div class="user-slots-filter-bar">
+                <div class="search-wrapper" style="max-width: 280px;">
+                    <i data-lucide="search"></i>
+                    <input type="text" id="user-slot-search" placeholder="Search slot (e.g. A01)...">
+                </div>
+                <div class="filter-pills" id="user-slot-filter-pills">
+                    <button class="filter-pill active" data-filter="all">All Slots</button>
+                    <button class="filter-pill" data-filter="available">
+                        <span class="pill-dot dot-available"></span> Available Only
+                    </button>
+                    <button class="filter-pill" data-filter="zone-a">Zone A</button>
+                    <button class="filter-pill" data-filter="zone-b">Zone B</button>
+                </div>
+            </div>
+
+            <div class="legend-bar">
+                <span class="legend-title">STATUS LEGEND</span>
+                <div class="legend-items">
+                    <span class="legend-item"><span class="dot dot-available"></span> Available</span>
+                    <span class="legend-item"><span class="dot dot-reserved"></span> Reserved</span>
+                    <span class="legend-item"><span class="dot dot-occupied"></span> Occupied</span>
+                    <span class="legend-item"><span class="dot dot-maintenance"></span> Maintenance</span>
+                </div>
+            </div>
+
+            <div class="slot-grid" id="user-slot-grid">
+                <!-- Populated by JS -->
+            </div>
+
+            <div class="empty-state hidden" id="user-slots-empty-state" style="margin-top: 2rem;">
+                <i data-lucide="slash"></i>
+                <p>No matching parking slots found for this filter.</p>
+            </div>
+        </section>
+
+        <!-- Information View -->
+        <section id="info-view" class="view hidden">
+            <header class="page-header">
+                <div class="header-content">
+                    <h1>Parking Information</h1>
+                    <p>Details and capacity overview.</p>
+                </div>
+            </header>
+            
+            <div class="info-panel">
+                <h2 id="info-facility-name">Kanakia Road Public Parking</h2>
+                <p><strong>Location:</strong> <span id="info-facility-address">Mira Road East</span></p>
+                <div style="margin-top: 1rem;">
+                    <p><strong>Capacity:</strong> <span id="info-capacity">50</span></p>
+                    <p><strong>Hourly Rate:</strong> <span id="info-rate">₹20/hr</span></p>
+                    <p><strong>Available:</strong> <span id="info-available">0</span></p>
+                    <p><strong>Occupied:</strong> <span id="info-occupied">0</span></p>
+                    <p><strong>Maintenance:</strong> <span id="info-maintenance">0</span></p>
+                    <p><strong>Current Occupancy:</strong> <span id="info-occupancy">0%</span></p>
+                    <p><strong>Parking Status:</strong> <span id="info-status">Available</span></p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Bookings View -->
+        <section id="bookings-view" class="view hidden">
+            <header class="page-header">
+                <div class="header-content">
+                    <h1>My Bookings</h1>
+                    <p>View and manage your parking reservations.</p>
+                </div>
+            </header>
+            
+            <div class="panel">
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Booking ID</th>
+                                <th>Location</th>
+                                <th>Slot</th>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="user-bookings-table">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                    <div class="empty-state hidden" id="user-bookings-empty">
+                        <i data-lucide="calendar-x"></i>
+                        <p>You have no bookings.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Slot Detail Modal -->
+    <div class="modal-overlay hidden" id="user-modal-slot">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Slot Details</h2>
+                <button class="close-modal" id="user-close-modal"><i data-lucide="x"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="slot-detail-header">
+                    <div class="slot-detail-id" id="user-modal-slot-id">A01</div>
+                    <div class="slot-detail-status">
+                        <span class="status-badge" id="user-modal-slot-badge">Available</span>
+                    </div>
+                </div>
+                <div class="slot-detail-info" style="margin-top: 1rem; margin-bottom: 1.5rem;">
+                    <p><strong>Location:</strong> Mira Road East</p>
+                    <p style="margin-top: 0.5rem;"><i data-lucide="clock"></i> Last Updated: <span id="user-modal-slot-time"></span></p>
+                </div>
+                <div id="booking-entry-point" class="hidden">
+                    <button class="btn primary-btn" id="btn-start-booking" style="width: 100%; justify-content: center;">Book this Slot</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Booking Modal -->
+    <div class="modal-overlay hidden" id="user-modal-book">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Book Parking Slot</h2>
+                <button class="close-modal" id="user-close-book-modal"><i data-lucide="x"></i></button>
+            </div>
+            <div class="modal-body">
+                <div id="booking-form-step">
+                    <form id="form-booking">
+                        <div class="form-group">
+                            <label>Selected Slot</label>
+                            <input type="text" id="book-slot-id" readonly disabled>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group half">
+                                <label for="book-date">Date</label>
+                                <input type="date" id="book-date" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group half">
+                                <label for="book-start-time">Start Time</label>
+                                <input type="time" id="book-start-time" required>
+                            </div>
+                            <div class="form-group half">
+                                <label for="book-end-time">End Time</label>
+                                <input type="time" id="book-end-time" required>
+                            </div>
+                        </div>
+                        <p class="form-help text-danger hidden" id="booking-error-msg" style="color: red; margin-bottom: 10px;"></p>
+                        <div class="form-actions">
+                            <button type="button" class="btn close-modal" id="btn-cancel-booking-form">Cancel</button>
+                            <button type="submit" class="btn primary-btn">Review Booking</button>
+                        </div>
+                    </form>
+                </div>
+                <div id="booking-summary-step" class="hidden">
+                    <div style="background: var(--bg-color); padding: 1rem; border-radius: var(--radius); margin-bottom: 1rem;">
+                        <h3 style="margin-bottom: 1rem; font-size: 1.1rem;">Booking Summary</h3>
+                        <p style="margin-bottom: 0.5rem;"><strong>Slot:</strong> <span id="summary-slot"></span></p>
+                        <p style="margin-bottom: 0.5rem;"><strong>Date:</strong> <span id="summary-date"></span></p>
+                        <p style="margin-bottom: 0.5rem;"><strong>Start Time:</strong> <span id="summary-start"></span></p>
+                        <p style="margin-bottom: 0.5rem;"><strong>End Time:</strong> <span id="summary-end"></span></p>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn" id="btn-back-to-booking">Back</button>
+                        <button type="button" class="btn primary-btn" id="btn-confirm-booking">Confirm Booking</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Toast Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="user.js"></script>
+</body>
+</html>
