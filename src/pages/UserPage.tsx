@@ -161,7 +161,7 @@ export const UserPage: React.FC = () => {
       <main className="user-main">
         {/* --- Hero Welcome View --- */}
         {activeTab === 'hero-view' && (
-          <section id="hero-view" className="view active">
+          <section key="hero-view" id="hero-view" className="view active">
             <div className="hero-landing-wrapper">
               <div className="hero-banner">
                 <div className="hero-pill-badge">
@@ -318,9 +318,10 @@ export const UserPage: React.FC = () => {
                   <button
                     type="button"
                     className="btn-hero-primary btn-explore-map"
+                    id="hero-bottom-find-slots"
                     onClick={() => {
-                      setActiveTab('slots-view');
-                      setSlotFilter('available');
+                      setActiveTab('home-view');
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
                     }}
                   >
                     <ArrowRightCircle style={{ width: 18, height: 18 }} /> Find Parking Slots
@@ -333,7 +334,7 @@ export const UserPage: React.FC = () => {
 
         {/* --- Live Facility View --- */}
         {activeTab === 'home-view' && (
-          <section id="home-view" className="view active">
+          <section key="home-view" id="home-view" className="view active">
             <div className="hero-section">
               <h1 id="user-facility-name">{currentFacility.name}</h1>
               <p id="user-facility-address">{currentFacility.address}</p>
@@ -459,7 +460,7 @@ export const UserPage: React.FC = () => {
 
         {/* --- Parking Slots View --- */}
         {activeTab === 'slots-view' && (
-          <section id="slots-view" className="view active">
+          <section key="slots-view" id="slots-view" className="view active">
             <header className="page-header">
               <div className="header-content">
                 <h1>Parking Slots</h1>
@@ -555,7 +556,7 @@ export const UserPage: React.FC = () => {
 
         {/* --- Information View --- */}
         {activeTab === 'info-view' && (
-          <section id="info-view" className="view active">
+          <section key="info-view" id="info-view" className="view active">
             <header className="page-header">
               <div className="header-content">
                 <h1>Parking Information</h1>
@@ -597,7 +598,7 @@ export const UserPage: React.FC = () => {
 
         {/* --- My Bookings View --- */}
         {activeTab === 'bookings-view' && (
-          <section id="bookings-view" className="view active">
+          <section key="bookings-view" id="bookings-view" className="view active">
             <header className="page-header">
               <div className="header-content">
                 <h1>My Bookings</h1>

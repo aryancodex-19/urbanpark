@@ -371,7 +371,7 @@ export const OperatorPage: React.FC = () => {
 
         {/* --- 1. Dashboard View --- */}
         {activeTab === 'dashboard-view' && (
-          <section id="dashboard-view" className="view active">
+          <section key="dashboard-view" id="dashboard-view" className="view active">
             <header
               className="page-header"
               style={{
@@ -600,7 +600,7 @@ export const OperatorPage: React.FC = () => {
 
         {/* --- 2. Parking Slots View --- */}
         {activeTab === 'slots-view' && (
-          <section id="slots-view" className="view active">
+          <section key="slots-view" id="slots-view" className="view active">
             <header className="page-header">
               <div className="header-content">
                 <h1>Parking Slots</h1>
@@ -671,7 +671,7 @@ export const OperatorPage: React.FC = () => {
 
         {/* --- 3. Bookings View --- */}
         {activeTab === 'bookings-view' && (
-          <section id="bookings-view" className="view active">
+          <section key="bookings-view" id="bookings-view" className="view active">
             <header className="page-header">
               <div className="header-content">
                 <h1>Bookings Management</h1>
@@ -778,7 +778,7 @@ export const OperatorPage: React.FC = () => {
 
         {/* --- 4. Usage View --- */}
         {activeTab === 'usage-view' && (
-          <section id="usage-view" className="view active">
+          <section key="usage-view" id="usage-view" className="view active">
             <header className="page-header flex-header">
               <div className="header-content">
                 <h1>Usage History</h1>
@@ -898,7 +898,7 @@ export const OperatorPage: React.FC = () => {
 
         {/* --- 5. Issues & Maintenance View --- */}
         {activeTab === 'issues-view' && (
-          <section id="issues-view" className="view active">
+          <section key="issues-view" id="issues-view" className="view active">
             <header className="page-header flex-header">
               <div className="header-content">
                 <h1>Issues & Maintenance</h1>
@@ -1067,7 +1067,7 @@ export const OperatorPage: React.FC = () => {
 
         {/* --- 6. Activity Log View --- */}
         {activeTab === 'activity-log-view' && (
-          <section id="activity-log-view" className="view active">
+          <section key="activity-log-view" id="activity-log-view" className="view active">
             <header className="page-header">
               <div className="header-content">
                 <h1>Activity Log</h1>
@@ -1141,7 +1141,7 @@ export const OperatorPage: React.FC = () => {
 
         {/* --- 7. Settings View --- */}
         {activeTab === 'settings-view' && (
-          <section id="settings-view" className="view active">
+          <section key="settings-view" id="settings-view" className="view active">
             <header className="page-header">
               <div className="header-content">
                 <h1>Settings</h1>
